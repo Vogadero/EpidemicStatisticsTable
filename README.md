@@ -8,6 +8,7 @@
 # 项目简介🚩
 
 - 疫情统计表
+- 演示地址：https://vogadero.github.io/EpidemicStatisticsTable/
 
 ## 1. 功能模块🎨
 
@@ -19,7 +20,7 @@
 
 ## 2. 截图⭐
 
-![](C:\Users\Administrator\Desktop\项目\疫情统计表\images\01.jpeg)
+![](images/01.jpeg)
 
 ## 3. 项目架构🍽️
 

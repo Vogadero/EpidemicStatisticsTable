@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>疫情统计表</title>
+    <link rel="stylesheet" href="assets/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <script src="js/jquery.js"></script>
+    <style type="text/css">
+        .container {
+            padding-top: 60px;
+        }
+
+        .vintage {
+            font-weight: bold;
+            background: #eee;
+            -webkit-background-clip: text;
+            text-shadow: 5px -5px black, 4px -4px white;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 标题容器 -->
+        <h3 id="title"></h3>
+        <!-- 总体统计容器 -->
+        <table class="table table-striped table-hover" align="center" id="countBox">
+        </table>
+        <!-- 疫苗容器 -->
+        <table class="table table-striped table-hover" align="center" id="vaccinesBox">
+        </table>
+        <!-- 病例容器 -->
+        <table class="table table-striped table-hover" align="center" id="caseBox">
+        </table>
+        <!-- 地址容器 -->
+        <table class="table table-striped table-hover" align="center" id="areaBox">
+        </table>
+        <div style="margin: 5px;text-align: center;color: #737373;font-size: 0.5vw;line-height: 3vw;">
+            数据来源：各地卫健委每日公开数据</div>
+    </div>
+    <!-- 引入template-web模版引擎 -->
+    <script src="js/template-web.js"></script>
+    <!-- 模版内容 -->
+    <script type="text/html" id="title_tpl">
+        <p class="vintage">{{title.showNotice}}</p>
+    </script>
+    <script type="text/html" id="count_tpl">
+        <tr>
+            <th>中国疫情总概</th>
+            <th>中国疫情趋势</th>
+        </tr>
+        <tr>
+            <td style="color: #e57631;">本土现有确诊(不含港澳台、不含境外输入)：{{infoTotal.localConfirm}}</td>
+            <td style="color: #e57631;">较上日：{{infoAdd.localConfirmH5}}</td>
+        </tr>
+        <tr>
+            <td style="color: #e61c1d;">现有确诊(含港澳台)：{{infoTotal.nowConfirm}}</td>
+            <td style="color: #e61c1d;">较上日：{{infoAdd.nowConfirm}}</td>
+        </tr>
+        <tr>
+            <td style="color: #be2121;">累计确诊：{{infoTotal.confirm}}</td>
+            <td style="color: #be2121;">较上日：{{infoAdd.confirm}}</td>
+        </tr>
+        <tr>
+            <td style="color: #ae3ac6;">无症状感染者：{{infoTotal.noInfect}}</td>
+            <td style="color: #ae3ac6;">较上日：{{infoAdd.noInfect}}</td>
+        </tr>
+        <tr>
+            <td style="color: #4e8be6;">境外输入：{{infoTotal.importedCase}}</td>
+            <td style="color: #4e8be6;">较上日：{{infoAdd.importedCase}}</td>
+        </tr>
+        <tr>
+            <td style="color: #4e5a65;">累计死亡：{{infoTotal.dead}}</td>
+            <td style="color: #4e5a65;">较上日：{{infoAdd.dead}}</td>
+        </tr>
+    </script>
+    <script type="text/html" id="vaccines_tpl">
+        <h3>
+            <p class="vintage">国内外新冠疫苗接种追踪</p>
+        </h3>
+        <tr>
+            <th>国内新冠疫苗接种追踪</th>
+            <th>国外新冠疫苗接种追踪</th>
+        </tr>
+        <tr>
+            <td style="color: green;">{{"累计接种"+(info.中国.total_vaccinations / 10000 / 10000).toFixed(2)+"亿剂"}}</td>
+            <td style="color: green;">{{"累计接种"+(info.全球.total_vaccinations / 10000 / 10000).toFixed(2)+"亿剂"}}</td>
+        </tr>
+        <tr>
+            <td style="color: orange;">{{"较上日新增"+(info.中国.new_vaccinations / 10000).toFixed(2)+"万剂"}}</td>
+            <td style="color: orange;">{{"较上日新增"+(info.全球.new_vaccinations / 10000).toFixed(2)+"万剂"}}</td>
+        </tr>
+        <tr>
+            <td style="color: tomato;">{{"每百人接种"+info.中国.total_vaccinations_per_hundred+"剂"}}</td>
+            <td style="color: tomato;">{{"每百人接种"+info.全球.total_vaccinations_per_hundred+"剂"}}</td>
+        </tr>
+    </script>
+    <script type="text/html" id="case_tpl">
+        <h3>
+            <p class="vintage">近期31省区市本土病例</p>
+        </h3>
+        <tr>
+            <th>时间</th>
+            <th>省市区</th>
+            <th>城市(区)</th>
+            <th>新增</th>
+            <th>现有确诊</th>
+            <th>累计确诊</th>
+            <th>治愈</th>
+            <th>死亡</th>
+        </tr>
+        {{each info}}
+        <tr>
+            <td>{{$value.syear+"/"+$value.sdate}}</td>
+            <td>{{$value.province}}</td>
+            <td>{{$value.city}}</td>
+            <td style="color: orangered;">{{$value.confirmAdd}}</td>
+            <td style="color: orange;">{{$value.nowConfirm}}</td>
+            <td style="color: blueviolet;">{{$value.confirm}}</td>
+            <td style="color: green;">{{$value.heal}}</td>
+            <td style="color: red">{{$value.dead}}</td>
+        </tr>
+        {{/each}}
+    </script>
+    <script type="text/html" id="area_tpl">
+        <h3>
+            <p class="vintage">风险地区统计</p>
+        </h3>
+        <tr>
+            <th>风险地区 <span style="font-size: 10px;color: red;">*标红为高风险地区</span></th>
+        </tr>
+        {{each info}}
+        <tr>
+            {{if $value.type==2}}
+            <td style="color: red;">{{$value.area}}</td>
+            {{else}}
+            <td>{{$value.area}}</td>
+            {{/if}}
+        </tr>
+        {{/each}}
+    </script>
+    <!-- jsp脚本 -->
+    <script type="text/javascript">
+        var countBox = document.getElementById("countBox");
+        var areaBox = document.getElementById("areaBox");
+        var title = document.getElementById("title");
+        var vaccines = document.getElementById("vaccinesBox");
+        var cases = document.getElementById("caseBox");
+        // 向服务器端获取地址信息
+        $.ajax({
+            type: "get",
+            url: "https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list",
+            data: {
+                modules: "statisGradeCityDetail,diseaseh5Shelf"
+            },
+            success: function (data) {
+                var html = template("count_tpl", {
+                    infoTotal: data.data.diseaseh5Shelf.chinaTotal,
+                    infoAdd: data.data.diseaseh5Shelf.chinaAdd
+                });
+                countBox.innerHTML = html;
+            }
+        });
+        $.ajax({
+            type: "get",
+            dataType: "jsonp",
+            // 请求地址
+            url: "https://eyesight.news.qq.com/sars/riskarea",
+            success: function (data) {
+                var html = template("area_tpl", {
+                    info: data.data
+                });
+                areaBox.innerHTML = html;
+            }
+        });
+        $.ajax({
+            type: "get",
+            dataType: "jsonp",
+            // 请求地址
+            url: "https://view.inews.qq.com/g2/getOnsInfo",
+            // 请求参数
+            data: {
+                name: "wuwei_ww_ww_today_notice"
+            },
+            success: function (data) {
+                var html = template("title_tpl", {
+                    title: JSON.parse(data.data)[0]
+                });
+                title.innerHTML = html;
+            }
+        });
+        $.ajax({
+            type: "get",
+            url: "https://api.inews.qq.com/newsqa/v1/automation/modules/list",
+            data: {
+                modules: "VaccineTopData"
+            },
+            success: function (data) {
+                var html = template("vaccines_tpl", {
+                    info: data.data.VaccineTopData
+                });
+                vaccines.innerHTML = html;
+            }
+        });
+        $.ajax({
+            type: "get",
+            url: "https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list",
+            data: {
+                modules: "statisGradeCityDetail,diseaseh5Shelf"
+            },
+            success: function (data) {
+                var html = template("case_tpl", {
+                    info: data.data.statisGradeCityDetail
+                });
+                cases.innerHTML = html;
+            }
+        });
+    </script>
+</body>
+
+</html>
